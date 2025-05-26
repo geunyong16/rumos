@@ -10,48 +10,70 @@ const boardModel = {
     },
     
     // Get all posts with pagination
-    getAllPosts: async (limit = 10, offset = 0, categoryId = null) => {
-        let query = `
-            SELECT bp.*, 
-                   u.username, 
-                   bc.name as category_name,
-                   (SELECT COUNT(*) FROM board_comments WHERE post_id = bp.post_id) as comment_count
-            FROM board_posts bp
-            JOIN users u ON bp.user_id = u.user_id
-            LEFT JOIN board_categories bc ON bp.category_id = bc.category_id
-        `;
-        
-        const values = [];
-        
-        // Filter by category if provided
-        if (categoryId) {
-            values.push(categoryId);
-            query += ` WHERE bp.category_id = $${values.length}`;
-        }
-        
-        // Add order, limit and offset
-        query += ` ORDER BY bp.created_at DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-        values.push(limit, offset);
-        
-        const result = await db.query(query, values);
-        return result.rows;
-    },
-    
-    // Get total post count
-    getPostCount: async (categoryId = null) => {
-        let query = 'SELECT COUNT(*) as total FROM board_posts';
-        
-        const values = [];
-        
-        // Filter by category if provided
-        if (categoryId) {
-            values.push(categoryId);
-            query += ` WHERE category_id = $1`;
-        }
-        
-        const result = await db.query(query, values);
-        return parseInt(result.rows[0].total);
-    },
+  getAllPosts: async (limit = 10, offset = 0, categoryId = null, search = '') => {
+    let query = `
+      SELECT bp.*, 
+             u.username, 
+             bc.name as category_name,
+             (SELECT COUNT(*) FROM board_comments WHERE post_id = bp.post_id) as comment_count
+      FROM board_posts bp
+      JOIN users u ON bp.user_id = u.user_id
+      LEFT JOIN board_categories bc ON bp.category_id = bc.category_id
+    `;
+
+    const values = [];
+    const conditions = [];
+
+    // 카테고리 조건
+    if (categoryId) {
+      values.push(categoryId);
+      conditions.push(`bp.category_id = $${values.length}`);
+    }
+
+    // 검색어 조건
+    if (search) {
+      values.push(`%${search}%`);
+      const index = values.length;
+      conditions.push(`(bp.title ILIKE $${index} OR bp.content ILIKE $${index})`);
+    }
+
+    // 조건 연결
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    // 정렬 + 페이징
+    values.push(limit, offset);
+    query += ` ORDER BY bp.created_at DESC LIMIT $${values.length - 1} OFFSET $${values.length}`;
+
+    const result = await db.query(query, values);
+    return result.rows;
+  },
+
+  // 게시글 총 개수 가져오기 (카테고리 + 검색어 필터 포함)
+  getPostCount: async (categoryId = null, search = '') => {
+    let query = 'SELECT COUNT(*) as total FROM board_posts';
+    const values = [];
+    const conditions = [];
+
+    if (categoryId) {
+      values.push(categoryId);
+      conditions.push(`category_id = $${values.length}`);
+    }
+
+    if (search) {
+      values.push(`%${search}%`);
+      const index = values.length;
+      conditions.push(`(title ILIKE $${index} OR content ILIKE $${index})`);
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    const result = await db.query(query, values);
+    return parseInt(result.rows[0].total);
+  },
     
     // Get post by ID with comments
     getPostById: async (postId) => {
