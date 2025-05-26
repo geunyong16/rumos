@@ -49,7 +49,10 @@
     "required": "This field is required",
     "titleTooShort": "Title must be at least 5 characters",
     "contentTooShort": "Content must be at least 10 characters",
-    "backToBoard": "Back to Board"
+    "backToBoard": "Back to Board",
+    "writeComment": "Write a comment",
+    "submitComment": "Submit",  
+    "emptyComment": "Please enter a comment"
   },
   "comments": {
     "title": "Comments",
