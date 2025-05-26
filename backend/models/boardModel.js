@@ -247,7 +247,15 @@ const boardModel = {
         
         const result = await db.query(query, [userId]);
         return result.rows;
+    },
+
+    // boardModel.js
+    getCommentById: async (commentId) => {
+        const query = 'SELECT * FROM board_comments WHERE comment_id = $1';
+        const result = await db.query(query, [commentId]);
+        return result.rows[0] || null;
     }
+
 };
 
 module.exports = boardModel;
