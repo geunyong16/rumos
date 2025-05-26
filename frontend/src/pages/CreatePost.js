@@ -45,7 +45,7 @@ const CreatePost = () => {
       const payload = {
         title: vals.title,
         content: vals.content,
-        category_id: vals.categoryId ? parseInt(vals.categoryId) : null, // snake-case 변환
+        categoryId: vals.categoryId ? parseInt(vals.categoryId) : null, // snake-case 변환
       };
 
       if (isEditMode) {
