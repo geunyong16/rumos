@@ -210,16 +210,12 @@ const boardController = {
                 return res.status(400).json({ message: 'Comment content is required' });
             }
             
-            // Get comment to check ownership
-            const commentQuery = 'SELECT * FROM board_comments WHERE comment_id = $1';
-            const commentResult = await db.query(commentQuery, [commentId]);
-            
-            if (commentResult.rows.length === 0) {
-                return res.status(404).json({ message: 'Comment not found' });
+            const comment = await boardModel.getCommentById(commentId);
+
+            if (!comment) {
+                    return res.status(404).json({ message: 'Comment not found' });
             }
-            
-            const comment = commentResult.rows[0];
-            
+
             // Check if user is the author or an admin
             if (comment.user_id !== userId && req.user.role !== 'admin') {
                 return res.status(403).json({ message: 'Not authorized to update this comment' });
@@ -242,32 +238,31 @@ const boardController = {
         try {
             const { commentId } = req.params;
             const userId = req.user.id;
-            
-            // Get comment to check ownership
-            const commentQuery = 'SELECT * FROM board_comments WHERE comment_id = $1';
-            const commentResult = await db.query(commentQuery, [commentId]);
-            
-            if (commentResult.rows.length === 0) {
-                return res.status(404).json({ message: 'Comment not found' });
+
+            // 💡 수정된 부분: db.query 대신 model 함수 사용
+            const comment = await boardModel.getCommentById(commentId);
+
+            if (!comment) {
+            return res.status(404).json({ message: 'Comment not found' });
             }
-            
-            const comment = commentResult.rows[0];
-            
-            // Check if user is the author or an admin
+
+            // 권한 확인
             if (comment.user_id !== userId && req.user.role !== 'admin') {
-                return res.status(403).json({ message: 'Not authorized to delete this comment' });
+            return res.status(403).json({ message: 'Not authorized to delete this comment' });
             }
-            
+
             await boardModel.deleteComment(commentId);
-            
+
             res.status(200).json({
-                message: 'Comment deleted successfully'
+            message: 'Comment deleted successfully'
             });
+
         } catch (error) {
             console.error('Error deleting comment:', error);
             res.status(500).json({ message: 'Error deleting comment' });
         }
     },
+
     
     // Get user's posts
     getUserPosts: async (req, res) => {
