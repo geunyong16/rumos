@@ -241,7 +241,7 @@ const PropertyDetail = () => {
                     // src={getImageUrl(
                     //   property.images[activeImageIndex].image_path,
                     // )}
-                    src={`${process.env.REACT_APP_API_URL}/${property.images[activeImageIndex].image_path.replace(/^[\\/]+/, '').replace(/\\/g, '/')}`}
+                    src={`${process.env.REACT_APP_API_URL}/uploads/properties/${property.images[activeImageIndex].image_path}`}
                     alt={property.address}
                     className="w-full h-full object-center object-cover"
                     onError={(e) => {
@@ -299,7 +299,8 @@ const PropertyDetail = () => {
                   >
                     <img
                       // src={getImageUrl(image.image_path)}
-                      src={`${process.env.REACT_APP_API_URL}/${property.images[activeImageIndex].image_path.replace(/^[\\/]+/, '').replace(/\\/g, '/')}`}
+                      src={`${process.env.REACT_APP_API_URL}/uploads/properties/${image.image_path}`}
+
                       alt={`${property.address} ${index + 1}`}
                       className="w-full h-full object-center object-cover"
                       onError={(e) => {
