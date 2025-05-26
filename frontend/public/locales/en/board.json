@@ -4,7 +4,8 @@
   "description": "Connect with other users, share experiences, and ask questions about living in Korea.",
 
   "board": {
-    "Category_Titles": "Categories"
+    "Category_Titles": "Categories",
+    "createPost": "Create Post"
   },
   "categories": {
     "all": "All Categories",
