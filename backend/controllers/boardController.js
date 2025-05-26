@@ -18,17 +18,19 @@ const boardController = {
     // Get all posts with pagination
     getAllPosts: async (req, res) => {
         try {
-            const { page = 1, limit = 10, category_id } = req.query;
+            const { page = 1, limit = 10, category_id, search = '' } = req.query;
             const offset = (page - 1) * limit;
             
             const posts = await boardModel.getAllPosts(
                 parseInt(limit),
                 parseInt(offset),
-                category_id ? parseInt(category_id) : null
+                category_id ? parseInt(category_id) : null,
+                search
             );
             
             const total = await boardModel.getPostCount(
-                category_id ? parseInt(category_id) : null
+                category_id ? parseInt(category_id) : null,
+                search
             );
             
             res.status(200).json({
