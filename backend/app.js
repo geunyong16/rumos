@@ -25,6 +25,7 @@ app.use(morgan('dev')); // HTTP request logger
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
 app.use('/api/users', userRoutes);
