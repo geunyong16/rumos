@@ -10,7 +10,7 @@ import { useFavorite } from '../../hooks/useFavorite';
 const API_BASE = process.env.REACT_APP_API_URL || '';
 
 const PropertyCard = ({ property }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('properties');
   const { isAuthenticated } = useAuth();
   const { isFavorite, toggleFavorite, loading } = useFavorite(property.property_id);
 
@@ -58,19 +58,19 @@ const PropertyCard = ({ property }) => {
 
           <div className="mt-4 flex justify-between">
             <div>
-              <p className="text-sm text-gray-500">{t('properties.deposit')}</p>
+              <p className="text-sm text-gray-500">{t('deposit')}</p>
               <p className="text-lg font-bold text-indigo-600">{formatCurrency(property.deposit)}</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500">{t('properties.monthlyRent')}</p>
+              <p className="text-sm text-gray-500">{t('monthlyRent')}</p>
               <p className="text-lg font-bold text-indigo-600">{formatCurrency(property.monthly_rent)}</p>
             </div>
           </div>
 
           <div className="mt-4 flex items-center text-sm text-gray-500 justify-between">
-            <span>{t(`properties.propertyTypes.${property.property_type}`)}</span>
+            <span>{t(`propertyTypes.${property.property_type}`)}</span>
             <span>
-              {property.room_count} {t('properties.rooms')} / {property.bathroom_count} {t('properties.bathrooms')}
+              {property.room_count} {t('rooms')} / {property.bathroom_count} {t('bathrooms')}
             </span>
           </div>
         </div>
