@@ -24,12 +24,12 @@ const boardController = {
             const posts = await boardModel.getAllPosts(
                 parseInt(limit),
                 parseInt(offset),
-                category_id ? parseInt(category_id) : null,
+                category_id,
                 search
             );
             
             const total = await boardModel.getPostCount(
-                category_id ? parseInt(category_id) : null,
+                category_id,
                 search
             );
             
