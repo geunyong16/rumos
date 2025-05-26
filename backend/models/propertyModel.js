@@ -4,6 +4,8 @@ const db = require('../config/db');
 const propertyModel = {
     // Get all properties (with filter options)
     getAllProperties: async (filters = {}) => {
+        console.log('[🔥 filters IN MODEL]', filters);
+
         let query = `
             SELECT p.*, 
                    (SELECT image_path FROM property_images pi WHERE pi.property_id = p.property_id AND pi.is_thumbnail = true LIMIT 1) as thumbnail,
@@ -46,7 +48,15 @@ const propertyModel = {
             values.push(filters.property_type);
             query += ` AND p.property_type = $${values.length}`;
         }
-        
+        if (filters.has_air_conditioner === true) {
+            query += ` AND p.has_air_conditioner = TRUE`;
+        }
+        if (filters.has_washing_machine === true) {
+            query += ` AND p.has_washing_machine = TRUE`;
+        }
+        if (filters.has_refrigerator === true) {
+            query += ` AND p.has_refrigerator = TRUE`;
+        }
         if (filters.room_count) {
             values.push(filters.room_count);
             query += ` AND p.room_count >= $${values.length}`;
@@ -65,7 +75,7 @@ const propertyModel = {
                 query += ` OFFSET $${values.length}`;
             }
         }
-        
+
         const result = await db.query(query, values);
         return result.rows;
     },
@@ -392,6 +402,18 @@ const propertyModel = {
         if (filters.property_type) {
             values.push(filters.property_type);
             query += ` AND p.property_type = $${values.length}`;
+        }
+        
+        if (filters.has_air_conditioner === true) {
+            query += ` AND p.has_air_conditioner = TRUE`;
+        }
+
+        if (filters.has_washing_machine === true) {
+            query += ` AND p.has_washing_machine = TRUE`;
+        }
+
+        if (filters.has_refrigerator === true) {
+            query += ` AND p.has_refrigerator = TRUE`;
         }
         
         if (filters.room_count) {

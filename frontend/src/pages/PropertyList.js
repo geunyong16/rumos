@@ -34,6 +34,9 @@ const PropertyList = ({ userProperties = false }) => {
     min_monthly_rent: '',
     max_monthly_rent: '',
     property_type: '',
+    has_air_conditioner: false,
+    has_washing_machine: false,
+    has_refrigerator: false,
     room_count: '',
   });
 
@@ -45,32 +48,28 @@ const PropertyList = ({ userProperties = false }) => {
 
   // Parse URL parameters and update state - this should only happen when URL actually changes
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    
-    // Extract page
-    const pageParam = searchParams.get('page');
-    const newPage = pageParam ? parseInt(pageParam) : 1;
-    
-    // Extract filters
-    const newFilters = {};
-    Object.keys(filters).forEach((key) => {
-      newFilters[key] = searchParams.get(key) || '';
-    });
-    
-    // Only update if values actually changed
-    setPagination(prev => {
-      if (prev.page !== newPage) {
-        return { ...prev, page: newPage };
-      }
-      return prev;
-    });
-    
-    // Only update filters if they actually changed
-    setFilters(prev => {
-      const hasChanged = Object.keys(newFilters).some(key => prev[key] !== newFilters[key]);
-      return hasChanged ? newFilters : prev;
-    });
-  }, [location.search]); // Only depend on location.search
+  const searchParams = new URLSearchParams(location.search);
+
+  // 페이지 초기값만 파싱
+  const pageParam = searchParams.get('page');
+  const newPage = pageParam ? parseInt(pageParam) : 1;
+
+  // 필터 초기값만 한 번 세팅
+  const newFilters = {};
+  const booleanKeys = ['has_air_conditioner', 'has_washing_machine', 'has_refrigerator'];
+
+  Object.keys(filters).forEach((key) => {
+    const value = searchParams.get(key);
+    if (booleanKeys.includes(key)) {
+      newFilters[key] = value === 'true';
+    } else {
+      newFilters[key] = value || '';
+    }
+  });
+
+  setFilters((prev) => ({ ...prev, ...newFilters }));
+  setPagination((prev) => ({ ...prev, page: newPage }));
+}, [location.search]); // Only depend on location.search
 
   // Fetch properties effect - separate from URL parsing
   useEffect(() => {
@@ -97,7 +96,7 @@ const PropertyList = ({ userProperties = false }) => {
         
         // Add filters
         Object.entries(filters).forEach(([key, value]) => {
-          if (value && value.trim() !== '') {
+          if ((typeof value === 'string' && value.trim() !== '') ||(typeof value === 'boolean' && value === true)) {
             params.append(key, value);
           }
         });
@@ -146,6 +145,9 @@ const PropertyList = ({ userProperties = false }) => {
     filters.max_monthly_rent,
     filters.property_type,
     filters.room_count,
+    filters.has_air_conditioner,      
+    filters.has_washing_machine,      
+    filters.has_refrigerator, 
     userProperties,
     isAgent,
     isAuthenticated,
@@ -170,7 +172,7 @@ const PropertyList = ({ userProperties = false }) => {
     
     // Add filters to params
     Object.entries(newFilters).forEach(([key, value]) => {
-      if (value && value.trim() !== '') {
+      if ((typeof value === 'string' && value.trim() !== '') || (typeof value === 'boolean' && value === true)) {
         params.set(key, value);
       } else {
         params.delete(key);

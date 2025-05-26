@@ -1,59 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const PropertyFilter = ({ onFilterChange }) => {
-  // properties.json 네임스페이스 사용
+const PropertyFilter = ({ filters, onFilterChange }) => {
   const { t } = useTranslation('properties');
 
   const [cities] = useState([
     'Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon', 'Gwangju', 'Ulsan'
   ]);
 
-  const [filters, setFilters] = useState({
-    city: '',
-    minDeposit: '',
-    maxDeposit: '',
-    minMonthlyRent: '',
-    maxMonthlyRent: '',
-    propertyType: '',
-    hasAirConditioner: false,
-    hasWashingMachine: false,
-    hasRefrigerator: false,
-  });
+  const [localFilters, setLocalFilters] = useState(filters);
 
-  // 디바운스 적용: 필터 변경 시 500ms 뒤에 부모로 전달
+  // filters prop이 바뀌면 localFilters도 업데이트
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
+
+  // localFilters 변경 시 부모 컴포넌트로 전달 (디바운스)
   useEffect(() => {
     const handler = setTimeout(() => {
-      onFilterChange(filters);
-    }, 500);
+      onFilterChange(localFilters);
+    }, 300);
     return () => clearTimeout(handler);
-  }, [filters, onFilterChange]);
+  }, [localFilters]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFilters(prev => ({
+    setLocalFilters(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
   };
 
   const handleClear = () => {
-    setFilters({
+    const reset = {
       city: '',
-      minDeposit: '',
-      maxDeposit: '',
-      minMonthlyRent: '',
-      maxMonthlyRent: '',
-      propertyType: '',
-      hasAirConditioner: false,
-      hasWashingMachine: false,
-      hasRefrigerator: false,
-    });
+      min_deposit: '',
+      max_deposit: '',
+      min_monthly_rent: '',
+      max_monthly_rent: '',
+      property_type: '',
+      has_air_conditioner: false,
+      has_washing_machine: false,
+      has_refrigerator: false,
+    };
+    setLocalFilters(reset);
+    onFilterChange(reset);
   };
 
   return (
     <div className="bg-white p-4 rounded-md shadow-md mb-6">
-      {/* Filter Header */}
       <h3 className="text-lg font-medium mb-4">{t('filters.filters')}</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
@@ -64,7 +59,7 @@ const PropertyFilter = ({ onFilterChange }) => {
           </label>
           <select
             name="city"
-            value={filters.city}
+            value={localFilters.city}
             onChange={handleInputChange}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -83,8 +78,8 @@ const PropertyFilter = ({ onFilterChange }) => {
           <div className="flex items-center space-x-2">
             <input
               type="number"
-              name="minDeposit"
-              value={filters.minDeposit}
+              name="min_deposit"
+              value={localFilters.min_deposit}
               onChange={handleInputChange}
               placeholder={t('filters.minDeposit')}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -92,8 +87,8 @@ const PropertyFilter = ({ onFilterChange }) => {
             <span>-</span>
             <input
               type="number"
-              name="maxDeposit"
-              value={filters.maxDeposit}
+              name="max_deposit"
+              value={localFilters.max_deposit}
               onChange={handleInputChange}
               placeholder={t('filters.maxDeposit')}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -109,8 +104,8 @@ const PropertyFilter = ({ onFilterChange }) => {
           <div className="flex items-center space-x-2">
             <input
               type="number"
-              name="minMonthlyRent"
-              value={filters.minMonthlyRent}
+              name="min_monthly_rent"
+              value={localFilters.min_monthly_rent}
               onChange={handleInputChange}
               placeholder={t('filters.minMonthlyRent')}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -118,8 +113,8 @@ const PropertyFilter = ({ onFilterChange }) => {
             <span>-</span>
             <input
               type="number"
-              name="maxMonthlyRent"
-              value={filters.maxMonthlyRent}
+              name="max_monthly_rent"
+              value={localFilters.max_monthly_rent}
               onChange={handleInputChange}
               placeholder={t('filters.maxMonthlyRent')}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -133,8 +128,8 @@ const PropertyFilter = ({ onFilterChange }) => {
             {t('filters.propertyType')}
           </label>
           <select
-            name="propertyType"
-            value={filters.propertyType}
+            name="property_type"
+            value={localFilters.property_type}
             onChange={handleInputChange}
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -154,30 +149,28 @@ const PropertyFilter = ({ onFilterChange }) => {
           <label className="inline-flex items-center">
             <input
               type="checkbox"
-              name="hasAirConditioner"
-              checked={filters.hasAirConditioner}
+              name="has_air_conditioner"
+              checked={localFilters.has_air_conditioner}
               onChange={handleInputChange}
               className="rounded text-blue-600 focus:ring-blue-500"
             />
             <span className="ml-2 text-sm text-gray-700">{t('amenitiesList.airConditioner')}</span>
           </label>
-
           <label className="inline-flex items-center">
             <input
               type="checkbox"
-              name="hasWashingMachine"
-              checked={filters.hasWashingMachine}
+              name="has_washing_machine"
+              checked={localFilters.has_washing_machine}
               onChange={handleInputChange}
               className="rounded text-blue-600 focus:ring-blue-500"
             />
             <span className="ml-2 text-sm text-gray-700">{t('amenitiesList.washingMachine')}</span>
           </label>
-
           <label className="inline-flex items-center">
             <input
               type="checkbox"
-              name="hasRefrigerator"
-              checked={filters.hasRefrigerator}
+              name="has_refrigerator"
+              checked={localFilters.has_refrigerator}
               onChange={handleInputChange}
               className="rounded text-blue-600 focus:ring-blue-500"
             />
@@ -186,7 +179,7 @@ const PropertyFilter = ({ onFilterChange }) => {
         </div>
       </div>
 
-      {/* Clear Filters Button */}
+      {/* Reset Button */}
       <div className="flex justify-end">
         <button
           onClick={handleClear}

@@ -17,11 +17,12 @@ const deleteFile = (filePath) => {
 const propertyController = {
     // Get all properties with filtering
     getAllProperties: async (req, res) => {
+
         try {
             // Extract filter parameters from query
             const {
                 city, min_deposit, max_deposit, min_monthly_rent, max_monthly_rent,
-                property_type, room_count, page = 1, limit = 10
+                property_type, has_air_conditioner, has_washing_machine, has_refrigerator, room_count, page = 1, limit = 10
             } = req.query;
             
             // Calculate offset for pagination
@@ -34,6 +35,9 @@ const propertyController = {
                 max_deposit: max_deposit ? parseInt(max_deposit) : undefined,
                 min_monthly_rent: min_monthly_rent ? parseInt(min_monthly_rent) : undefined,
                 max_monthly_rent: max_monthly_rent ? parseInt(max_monthly_rent) : undefined,
+                has_air_conditioner: has_air_conditioner === 'true', 
+                has_washing_machine: has_washing_machine === 'true', 
+                has_refrigerator: has_refrigerator === 'true',   
                 property_type,
                 room_count: room_count ? parseInt(room_count) : undefined,
                 limit: parseInt(limit),
