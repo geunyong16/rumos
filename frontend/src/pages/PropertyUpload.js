@@ -56,17 +56,41 @@ const PropertyUpload = () => {
     try {
       const formData = new FormData();
       
+      // ✅ key 변환: camelCase → snake_case
+      const fieldMap = {
+        monthlyRent: 'monthly_rent',
+        maintenanceFee: 'maintenance_fee',
+        constructionDate: 'construction_date',
+        availableFrom: 'available_from',
+        roomSize: 'room_size',
+        roomCount: 'room_count',
+        bathroomCount: 'bathroom_count',
+        totalFloors: 'total_floors',
+        heatingType: 'heating_type',
+        propertyType: 'property_type',
+        minStayMonths: 'min_stay_months',
+        hasBed: 'has_bed',
+        hasWashingMachine: 'has_washing_machine',
+        hasRefrigerator: 'has_refrigerator',
+        hasMicrowave: 'has_microwave',
+        hasDesk: 'has_desk',
+        hasCloset: 'has_closet',
+        hasAirConditioner: 'has_air_conditioner',
+      };
+
       // Append all form values
       Object.keys(values).forEach(key => {
+        const mappedKey = fieldMap[key] || key;
         if (values[key] !== undefined && values[key] !== null) {
-          formData.append(key, values[key]);
+          formData.append(mappedKey, values[key]);
         }
       });
       
       // Append images if any
-      images.forEach(image => {
+      images.forEach((image) => {
         formData.append('images', image);
       });
+      formData.append('thumbnailIndex', 0);
 
       if (isEditMode) {
         await updateProperty(id, formData);
