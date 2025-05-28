@@ -375,7 +375,7 @@ const PropertyUpload = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label htmlFor="deposit" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('property.deposit')} (만원) *
+                {t('property.deposit')} (원) *
               </label>
               <input
                 type="number"
@@ -395,7 +395,7 @@ const PropertyUpload = () => {
             
             <div>
               <label htmlFor="monthlyRent" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('property.monthlyRent')} (만원) *
+                {t('property.monthlyRent')} (원) *
               </label>
               <input
                 type="number"
@@ -415,7 +415,7 @@ const PropertyUpload = () => {
             
             <div>
               <label htmlFor="maintenanceFee" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('property.maintenanceFee')} (만원)
+                {t('property.maintenanceFee')} (원)
               </label>
               <input
                 type="number"
@@ -429,7 +429,158 @@ const PropertyUpload = () => {
             </div>
           </div>
         </div>
-        
+        <div className="mb-6">
+  <h2 className="text-lg font-semibold mb-3">{t('property.details')}</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label htmlFor="roomSize" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.roomSize')} (㎡)
+      </label>
+      <input
+        type="number"
+        id="roomSize"
+        name="roomSize"
+        value={values.roomSize}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="roomCount" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.roomCount')}
+      </label>
+      <input
+        type="number"
+        id="roomCount"
+        name="roomCount"
+        value={values.roomCount}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="bathroomCount" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.bathroomCount')}
+      </label>
+      <input
+        type="number"
+        id="bathroomCount"
+        name="bathroomCount"
+        value={values.bathroomCount}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="floor" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.floor')}
+      </label>
+      <input
+        type="number"
+        id="floor"
+        name="floor"
+        value={values.floor}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="totalFloors" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.totalFloors')}
+      </label>
+      <input
+        type="number"
+        id="totalFloors"
+        name="totalFloors"
+        value={values.totalFloors}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="constructionDate" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.constructionDate')}
+      </label>
+      <input
+        type="date"
+        id="constructionDate"
+        name="constructionDate"
+        value={values.constructionDate}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="availableFrom" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.availableFrom')}
+      </label>
+      <input
+        type="date"
+        id="availableFrom"
+        name="availableFrom"
+        value={values.availableFrom}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="minStayMonths" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.minStay')} (개월)
+      </label>
+      <input
+        type="number"
+        id="minStayMonths"
+        name="minStayMonths"
+        value={values.minStayMonths}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      />
+    </div>
+    <div>
+      <label htmlFor="heatingType" className="block text-sm font-medium text-gray-700 mb-1">
+        {t('property.heatingType')}
+      </label>
+      <select
+        id="heatingType"
+        name="heatingType"
+        value={values.heatingType}
+        onChange={handleChange}
+        className="w-full p-3 border border-gray-300 rounded-md"
+      >
+        <option value="individual">{t('property.heatingTypes.individual')}</option>
+        <option value="central">{t('property.heatingTypes.central')}</option>
+        <option value="district">{t('property.heatingTypes.district')}</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+{/* Amenities */}
+<div className="mb-6">
+  <h2 className="text-lg font-semibold mb-3">{t('property.amenities')}</h2>
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    {[
+      'hasBed',
+      'hasWashingMachine',
+      'hasRefrigerator',
+      'hasMicrowave',
+      'hasDesk',
+      'hasCloset',
+      'hasAirConditioner'
+    ].map((field) => (
+      <label key={field} className="inline-flex items-center">
+          <input
+      type="checkbox"
+      name={field}
+      checked={values[field] || false}
+      onChange={handleChange}
+      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+    />
+    <span className="ml-2 text-sm text-gray-700">{t(`property.amenityLabels.${field}`)}</span>
+  </label>
+    ))}
+  </div>
+</div>
         {/* Property Details */}
         {/* Additional sections for room details, availability, amenities, etc. would go here */}
         {/* Similar structure to the sections above */}
