@@ -12,14 +12,9 @@
     "roomCount": "Room Count",
     "applyFilters": "Apply Filters",
     "resetFilters": "Reset Filters",
-    "noFiltersApplied": "No  filters applied",
-    "filtersApplied": "Filters applied"
-  },
-  "propertyTypes": {
-    "apartment": "Apartment",
-    "officetel": "Officetel",
-    "house": "House",
-    "studio": "Studio"
+    "noFiltersApplied": "No filters applied",
+    "filtersApplied": "Filters applied",
+    "filters": "Filters"
   },
   "deposit": "Deposit",
   "monthlyRent": "Monthly Rent",
@@ -52,6 +47,20 @@
   "propertyDeleted": "Property deleted successfully",
   "propertyAdded": "Property added successfully",
   "propertyUpdated": "Property updated successfully",
+  "uploadImages": "Upload Images",
+  "chooseMainImage": "Choose Main Image",
+  "requiredFields": "* Required fields",
+  "amenitiesList": {
+    "airConditioner": "Air Conditioner",
+    "washingMachine": "Washing Machine",
+    "refrigerator": "Refrigerator"
+  },
+  "propertyTypes":{
+    "house":"House",
+    "officetel": "Officetel",
+    "apartment":"Apartment",
+    "studio":"Studio"
+  },
   "contactRequest": {
     "title": "Contact Agent",
     "message": "Message",
@@ -59,22 +68,5 @@
     "send": "Send Request",
     "sent": "Request Sent",
     "error": "Error sending request"
-  },
-  "heatingTypes": {
-    "central": "Central",
-    "individual": "Individual",
-    "district": "District"
-  },
-  "amenitiesList": {
-    "bed": "Bed",
-    "washingMachine": "Washing Machine",
-    "refrigerator": "Refrigerator",
-    "microwave": "Microwave",
-    "desk": "Desk",
-    "closet": "Closet",
-    "airConditioner": "Air Conditioner"
-  },
-  "uploadImages": "Upload Images",
-  "chooseMainImage": "Choose Main Image",
-  "requiredFields": "* Required fields"
+  }
 }
