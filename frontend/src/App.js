@@ -25,6 +25,7 @@ const PropertyUpload = React.lazy(() => import('./pages/PropertyUpload'));
 const RegisterAgent = React.lazy(() => import('./pages/RegisterAgent'));
 const UserProfile = React.lazy(() => import('./pages/UserProfile'));
 const AgentProfile = React.lazy(() => import('./pages/AgentProfile'));
+const MyProperties = React.lazy(() => import('./pages/MyProperties'));
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
@@ -52,7 +53,7 @@ function App() {
             <Route path="/board/edit/:id" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
             <Route path="/profile/agent" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
-
+            <Route path="/agent/properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
             {/* Admin */}
             <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
 
