@@ -1,14 +1,13 @@
-// frontend/src/pages/MyProperties.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  PencilIcon, 
-  TrashIcon, 
-  EyeIcon, 
+import {
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
   PlusIcon,
   HomeIcon,
   MapPinIcon,
@@ -16,11 +15,25 @@ import {
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
 
+// 이미지 URL을 올바르게 생성하기 위한 헬퍼 함수 추가
+const getImageUrl = (thumbnailPath) => {
+  if (!thumbnailPath) {
+    // 썸네일 경로가 없는 경우, 기본 이미지 경로 또는 빈 문자열 반환
+    return '/no-image.svg'; // public 폴더에 no-image.svg 파일이 있다고 가정
+  }
+  // thumbnailPath가 '/uploads'로 시작하면 DB에 저장된 전체 경로이므로 그대로 사용
+  // 그렇지 않다면, 기존 방식의 파일명으로 간주하고 전체 경로를 조립
+  return thumbnailPath.startsWith('/uploads')
+    ? `${process.env.REACT_APP_API_URL}${thumbnailPath}`
+    : `${process.env.REACT_APP_API_URL}/uploads/properties/${thumbnailPath}`;
+};
+
+
 const MyProperties = () => {
   const { t } = useTranslation(['properties', 'common']);
   const { currentUser, isAuthenticated, isAgent, getAuthHeader } = useAuth();
   const navigate = useNavigate();
-  
+
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,22 +61,22 @@ const MyProperties = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/properties/agent/${currentUser.agentProfile.agent_id}`,
         { headers: getAuthHeader() }
       );
-      
+
       const propertyList = response.data.properties || [];
       setProperties(propertyList);
-      
+
       // Calculate stats
       setStats({
         total: propertyList.length,
         active: propertyList.filter(p => p.is_active).length,
         inactive: propertyList.filter(p => !p.is_active).length
       });
-      
+
     } catch (err) {
       console.error('Failed to fetch properties:', err);
       setError(err.response?.data?.message || 'Failed to load properties');
@@ -79,13 +92,13 @@ const MyProperties = () => {
         `${process.env.REACT_APP_API_URL}/properties/${propertyId}`,
         { headers: getAuthHeader() }
       );
-      
+
       toast.success('Property deleted successfully');
       setDeleteModal({ isOpen: false, property: null });
-      
+
       // Refresh the properties list
       fetchMyProperties();
-      
+
     } catch (err) {
       console.error('Error deleting property:', err);
       toast.error(err.response?.data?.message || 'Failed to delete property');
@@ -99,23 +112,23 @@ const MyProperties = () => {
         { is_active: !currentStatus },
         { headers: getAuthHeader() }
       );
-      
+
       toast.success(`Property ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
-      
+
       // Update the property in the list
-      setProperties(prev => prev.map(p => 
-        p.property_id === propertyId 
+      setProperties(prev => prev.map(p =>
+        p.property_id === propertyId
           ? { ...p, is_active: !currentStatus }
           : p
       ));
-      
+
       // Update stats
       setStats(prev => ({
         ...prev,
         active: prev.active + (!currentStatus ? 1 : -1),
         inactive: prev.inactive + (!currentStatus ? -1 : 1)
       }));
-      
+
     } catch (err) {
       console.error('Error toggling property status:', err);
       toast.error(err.response?.data?.message || 'Failed to update property status');
@@ -162,7 +175,7 @@ const MyProperties = () => {
                 Manage your property listings and track their performance
               </p>
             </div>
-            
+
             {currentUser.agentProfile.verification_status === 'verified' && (
               <Link
                 to="/properties/upload"
@@ -315,8 +328,12 @@ const MyProperties = () => {
                           {property.thumbnail ? (
                             <img
                               className="h-24 w-24 rounded-lg object-cover shadow-sm"
-                              src={`${process.env.REACT_APP_API_URL}${property.thumbnail}`}
+                              src={getImageUrl(property.thumbnail)}
                               alt={property.address}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null; // 무한 루프 방지
+                                e.currentTarget.src = '/no-image.svg';
+                              }}
                             />
                           ) : (
                             <div className="h-24 w-24 rounded-lg bg-gray-200 flex items-center justify-center">
@@ -334,19 +351,19 @@ const MyProperties = () => {
                                   {property.address}
                                 </h3>
                                 <span className={`ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  property.is_active 
-                                    ? 'bg-green-100 text-green-800' 
+                                  property.is_active
+                                    ? 'bg-green-100 text-green-800'
                                     : 'bg-red-100 text-red-800'
-                                }`}>
+                                  }`}>
                                   {property.is_active ? 'Active' : 'Inactive'}
                                 </span>
                               </div>
-                              
+
                               <div className="mt-1 flex items-center text-sm text-gray-500">
                                 <MapPinIcon className="flex-shrink-0 mr-1.5 h-4 w-4" />
                                 <span>{property.city}{property.district && `, ${property.district}`}</span>
                               </div>
-                              
+
                               <div className="mt-2 flex items-center text-sm text-gray-500">
                                 <CurrencyDollarIcon className="flex-shrink-0 mr-1.5 h-4 w-4" />
                                 <span className="font-medium">
@@ -355,13 +372,13 @@ const MyProperties = () => {
                                 <span className="mx-2">•</span>
                                 <span>{property.room_count} rooms, {property.bathroom_count} baths</span>
                               </div>
-                              
+
                               <div className="mt-1 flex items-center text-sm text-gray-500">
                                 <CalendarIcon className="flex-shrink-0 mr-1.5 h-4 w-4" />
                                 <span>Created: {formatDate(property.created_at)}</span>
                               </div>
                             </div>
-                            
+
                             <div className="ml-4 text-right">
                               <p className="text-sm font-medium text-gray-900">
                                 {t(`propertyTypes.${property.property_type}`) || property.property_type}
@@ -383,7 +400,7 @@ const MyProperties = () => {
                         >
                           <EyeIcon className="h-4 w-4" />
                         </Link>
-                        
+
                         <Link
                           to={`/agent/properties/edit/${property.property_id}`}
                           className="inline-flex items-center p-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -391,21 +408,21 @@ const MyProperties = () => {
                         >
                           <PencilIcon className="h-4 w-4" />
                         </Link>
-                        
+
                         <button
                           onClick={() => togglePropertyStatus(property.property_id, property.is_active)}
                           className={`inline-flex items-center p-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                             property.is_active
                               ? 'border-red-300 text-red-700 bg-white hover:bg-red-50 focus:ring-red-500'
                               : 'border-green-300 text-green-700 bg-white hover:bg-green-50 focus:ring-green-500'
-                          }`}
+                            }`}
                           title={property.is_active ? 'Deactivate' : 'Activate'}
                         >
                           <div className={`h-4 w-4 rounded-full ${
                             property.is_active ? 'bg-red-500' : 'bg-green-500'
-                          }`}></div>
+                            }`}></div>
                         </button>
-                        
+
                         <button
                           onClick={() => setDeleteModal({ isOpen: true, property })}
                           className="inline-flex items-center p-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -435,7 +452,7 @@ const MyProperties = () => {
                 </h3>
                 <div className="mt-2 px-7 py-3">
                   <p className="text-sm text-gray-500">
-                    Are you sure you want to delete <strong>"{deleteModal.property?.address}"</strong>? 
+                    Are you sure you want to delete <strong>"{deleteModal.property?.address}"</strong>?
                     This action cannot be undone and will permanently remove all property data and images.
                   </p>
                 </div>
