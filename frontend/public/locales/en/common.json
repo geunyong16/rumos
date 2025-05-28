@@ -48,5 +48,53 @@
     "gwangju": "Gwangju",
     "ulsan": "Ulsan",
     "sejong": "Sejong"
+  },
+  "property": {
+    "addProperty": "Add New Property",
+    "editProperty": "Edit Property",
+    "images": "Images",
+    "addImage": "Upload Image",
+    "imageRequired": "At least one image is required.",
+    "basicInfo": "Basic Information",
+    "address": "Address",
+    "city": "City",
+    "selectCity": "Select a City",
+    "district": "District",
+    "type": "Property Type",
+    "pricing": "Pricing",
+    "deposit": "Deposit (KRW)",
+    "monthlyRent": "Monthly Rent (KRW)",
+    "maintenanceFee": "Maintenance Fee (KRW)",
+    "details": "Property Details",
+    "roomSize": "Room Size (㎡)",
+    "roomCount": "Number of Rooms",
+    "bathroomCount": "Number of Bathrooms",
+    "floor": "Floor",
+    "totalFloors": "Total Floors",
+    "constructionDate": "Construction Date",
+    "availableFrom": "Available From",
+    "minStay": "Minimum Stay (months)",
+    "heatingType": "Heating Type",
+    "types": {
+      "apartment": "Apartment",
+      "officetel": "Officetel",
+      "house": "House",
+      "studio": "Studio"
+    },
+    "heatingTypes": {
+      "individual": "Individual Heating",
+      "central": "Central Heating",
+      "district": "District Heating"
+    },
+    "amenities": "Amenities",
+    "amenityLabels": {
+      "hasBed": "Bed",
+      "hasWashingMachine": "Washing Machine",
+      "hasRefrigerator": "Refrigerator",
+      "hasMicrowave": "Microwave",
+      "hasDesk": "Desk",
+      "hasCloset": "Closet",
+      "hasAirConditioner": "Air Conditioner"
+    }
   }
 }
