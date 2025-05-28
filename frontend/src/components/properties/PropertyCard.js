@@ -28,9 +28,12 @@ const PropertyCard = ({ property }) => {
   };
 
   // thumbnail 이 있으면, 업로드된 파일 경로로, 아니면 placeholder
-  const imageUrl = property.thumbnail
-    ? `${API_BASE}/uploads/properties/${property.thumbnail}`
-    : '/placeholder.png';
+const imageUrl = property.thumbnail
+  ? property.thumbnail.startsWith('/uploads')
+    ? `${API_BASE}${property.thumbnail}`       // 새로 등록한 매물 (이미 절대 경로)
+    : `${API_BASE}/uploads/properties/${property.thumbnail}`  // 기존 테스트 매물
+  : '/placeholder.png';
+
 
   return (
     <Link to={`/properties/${property.property_id}`} className="group">
