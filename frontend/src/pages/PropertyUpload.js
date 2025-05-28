@@ -375,7 +375,7 @@ const PropertyUpload = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label htmlFor="deposit" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('property.deposit')} (원) *
+                {t('property.deposit')} *
               </label>
               <input
                 type="number"
@@ -395,7 +395,7 @@ const PropertyUpload = () => {
             
             <div>
               <label htmlFor="monthlyRent" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('property.monthlyRent')} (원) *
+                {t('property.monthlyRent')} *
               </label>
               <input
                 type="number"
@@ -415,7 +415,7 @@ const PropertyUpload = () => {
             
             <div>
               <label htmlFor="maintenanceFee" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('property.maintenanceFee')} (원)
+                {t('property.maintenanceFee')}
               </label>
               <input
                 type="number"
@@ -434,7 +434,7 @@ const PropertyUpload = () => {
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>
       <label htmlFor="roomSize" className="block text-sm font-medium text-gray-700 mb-1">
-        {t('property.roomSize')} (㎡)
+        {t('property.roomSize')}
       </label>
       <input
         type="number"
@@ -525,7 +525,7 @@ const PropertyUpload = () => {
     </div>
     <div>
       <label htmlFor="minStayMonths" className="block text-sm font-medium text-gray-700 mb-1">
-        {t('property.minStay')} (개월)
+        {t('property.minStay')}
       </label>
       <input
         type="number"
