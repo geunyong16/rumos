@@ -179,3 +179,24 @@ export const validatePostForm = (field, values) => {
   
   return null;
 };
+
+export const validatePropertyData = (data) => {
+  const errors = [];
+
+  const requiredFields = ['address', 'city', 'deposit', 'monthly_rent'];
+  const numericFields = ['deposit', 'monthly_rent', 'maintenance_fee', 'room_size', 'floor', 'total_floors'];
+
+  requiredFields.forEach((field) => {
+    if (!data[field]) {
+      errors.push({ field, message: 'validation.required' });
+    }
+  });
+
+  numericFields.forEach((field) => {
+    if (data[field] && isNaN(Number(data[field]))) {
+      errors.push({ field, message: 'validation.numeric' });
+    }
+  });
+
+  return errors;
+};
