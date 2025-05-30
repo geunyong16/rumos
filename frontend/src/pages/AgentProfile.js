@@ -1,221 +1,348 @@
-// src/pages/AgentProfile.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, Link } from 'react-router-dom';
-
 import { useAuth } from '../contexts/AuthContext';
-import {
-  getAgentProfile,
-  getAgentProperties,
-  updateAgentProfile,
-} from '../services/authService';
-
+import { Navigate } from 'react-router-dom';
+import { updateUserProfile, updatePassword } from '../services/authService';
 import useForm from '../hooks/useForm';
-import { validateProfile } from '../utils/validators';
-import PropertyCard from '../components/properties/PropertyCard';
+import { validateProfile, validatePasswordChange } from '../utils/validators';
+import { updateAgentProfile } from '../services/authService';
+import { getCurrentUser } from '../services/authService';
 
-const AgentProfile = () => {
-  const { t } = useTranslation('profile');
-  const { currentUser, updateUser } = useAuth();
 
-  /* ───────────── state ───────────── */
-  const [properties, setProperties] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
-  const [submitOK, setSubmitOK] = useState(false);
-  const [submitErr, setSubmitErr] = useState(null);
+const UserProfile = () => {
+  const { t } = useTranslation(['profile', 'agentProfile']);
+  const { currentUser, updateUser, isAuthenticated } = useAuth();
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [updateError, setUpdateError] = useState(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [passwordError, setPasswordError] = useState(null);
 
-  /* ───────────── form ───────────── */
-  const {
-    values,
-    errors,
-    handleChange,
-    handleBlur,
-    handleSubmit: submitForm,
-    /* ⚠️ useForm 훅에 아래 메서드가 없으면
-       네 훅에 setFormValues 같은 리셋 함수 추가하면 됩니다 */
-    setFormValues,
-  } = useForm(
-    { companyName: '', officeAddress: '' },
-    validateProfile,
-    async (vals) => {
-      setSubmitOK(false);
-      setSubmitErr(null);
-      try {
+  // Profile form setup
+  const initialProfileValues = {
+    email: currentUser?.email || '',
+    phoneNumber: currentUser?.phone_number || '',
+    companyName: currentUser?.agentProfile?.company_name || '',
+    officeAddress: currentUser?.agentProfile?.office_address || '',
+  };
+
+
+  const handleProfileSubmit = async (values) => {
+    setUpdateSuccess(false);
+    setUpdateError(null);
+
+    try {
+      const { email, phoneNumber, companyName, officeAddress } = values;
+
+      const updatedUser = await updateUserProfile({
+        email,
+        phone_number: phoneNumber
+      });
+
+      if (currentUser.role === 'agent') {
         await updateAgentProfile({
-          companyName: vals.companyName,
-          officeAddress: vals.officeAddress,
+          companyName,
+          officeAddress
         });
-        updateUser((prev) => ({
-          ...prev,
-          agentProfile: {
-            ...prev.agentProfile,
-            company_name: vals.companyName,
-            office_address: vals.officeAddress,
-          },
-        }));
-        setSubmitOK(true);
-      } catch (e) {
-        setSubmitErr(e.message || t('profile.updateError'));
       }
+
+      // ✅ 서버에서 새로 받아서 context 최신화
+      const freshUser = await getCurrentUser();
+      updateUser(freshUser);
+
+
+      setUpdateSuccess(true);
+    } catch (error) {
+      console.error('❌ Profile update failed:', error);
+      setUpdateError(error.message || t('profile.updateError'));
     }
-  );
+  };
 
-  /* ───────────── 프로필 + 매물 한번에 로드 ───────────── */
-  useEffect(() => {
-    const loadEverything = async () => {
-      if (!currentUser || currentUser.role !== 'agent') return;
+  const {
+    values: profileValues,
+    errors: profileErrors,
+    handleChange: handleProfileChange,
+    handleBlur: handleProfileBlur,
+    handleSubmit: submitProfileForm
+  } = useForm(initialProfileValues, validateProfile, handleProfileSubmit);
 
-      try {
-        // ① 프로필 (없을 때만)
-        if (!currentUser.agentProfile) {
-          const profile = await getAgentProfile();
-          updateUser((prev) => ({ ...prev, agentProfile: profile }));
-          setFormValues({
-            companyName: profile.company_name || '',
-            officeAddress: profile.office_address || '',
-          });
-        } else {
-          setFormValues({
-            companyName: currentUser.agentProfile.company_name || '',
-            officeAddress: currentUser.agentProfile.office_address || '',
-          });
-        }
+  // Password form setup
+  const initialPasswordValues = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  };
 
-        // ② 내 매물
-        const list = await getAgentProperties();
-        setProperties(list);
-      } catch (err) {
-        console.error('AgentProfile load fail', err);
-      } finally {
-        setLoadingData(false);
-      }
-    };
+  const handlePasswordSubmit = async (values) => {
+    setPasswordSuccess(false);
+    setPasswordError(null);
 
-    loadEverything();
-  }, [currentUser, updateUser, setFormValues]);
+    try {
+      await updatePassword({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
 
-  /* ───────────── 보호 라우팅 ───────────── */
-  if (!currentUser || currentUser.role !== 'agent') {
-    return <Navigate to="/" replace />;
+      setPasswordSuccess(true);
+
+      // Reset form
+      passwordResetForm();
+    } catch (error) {
+      setPasswordError(error.message || 'Failed to update password');
+    }
+  };
+
+  const {
+    values: passwordValues,
+    errors: passwordErrors,
+    handleChange: handlePasswordChange,
+    handleBlur: handlePasswordBlur,
+    handleSubmit: submitPasswordForm,
+    resetForm: passwordResetForm
+  } = useForm(initialPasswordValues, validatePasswordChange, handlePasswordSubmit);
+
+  // Redirect if not logged in
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
-  const status = currentUser.agentProfile?.verification_status;
 
-  /* ───────────── JSX ───────────── */
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-2xl font-bold mb-6">{t('profile.title')}</h1>
 
-      {/* ----- INFO CARD ----- */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">{t('agent.info')}</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('profile.info')}</h2>
 
-        {submitOK && (
-          <div className="bg-green-100 text-green-700 px-4 py-2 rounded mb-4">
+        {updateSuccess && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             {t('profile.updateSuccess')}
           </div>
         )}
-        {submitErr && (
-          <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">
-            {submitErr}
+
+        {updateError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {updateError}
           </div>
         )}
 
-        {/* ── verification badge ── */}
         <div className="mb-4">
-          <span className="font-medium mr-2">{t('agent.verificationStatus')}:</span>
-          <span
-            className={`px-2 py-1 text-xs rounded-full ${
-              status === 'verified'
-                ? 'bg-green-100 text-green-800'
-                : status === 'rejected'
-                ? 'bg-red-100 text-red-800'
-                : 'bg-yellow-100 text-yellow-800'
-            }`}
-          >
-            {status ? t(`agent.${status}`) : t('agent.loadingStatus')}
-          </span>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t('profile.username')}
+          </label>
+          <input
+            type="text"
+            value={currentUser.username}
+            disabled
+            className="w-full p-3 border border-gray-300 rounded-md bg-gray-50"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {t('profile.usernameCannotBeChanged')}
+          </p>
         </div>
 
-        {/* ── profile form ── */}
-        <form onSubmit={submitForm}>
-          {/* companyName */}
+        <form onSubmit={submitProfileForm}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('agent.companyName')}
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              {t('profile.email')}
             </label>
             <input
-              type="text"
-              name="companyName"
-              value={values.companyName}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={`w-full p-2 border rounded-md ${
-                errors.companyName ? 'border-red-500' : 'border-gray-300'
-              }`}
+              type="email"
+              id="email"
+              name="email"
+              value={profileValues.email}
+              onChange={handleProfileChange}
+              onBlur={handleProfileBlur}
+              className={`w-full p-3 border rounded-md ${profileErrors.email ? 'border-red-500' : 'border-gray-300'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
-            {errors.companyName && (
-              <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>
+            {profileErrors.email && (
+              <p className="text-red-500 text-xs mt-1">{profileErrors.email}</p>
             )}
           </div>
 
-          {/* officeAddress */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('agent.officeAddress')}
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+              {t('profile.phoneNumber')}
             </label>
-            <textarea
-              name="officeAddress"
-              value={values.officeAddress}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              rows="3"
-              className={`w-full p-2 border rounded-md ${
-                errors.officeAddress ? 'border-red-500' : 'border-gray-300'
-              }`}
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={profileValues.phoneNumber}
+              onChange={handleProfileChange}
+              onBlur={handleProfileBlur}
+              className={`w-full p-3 border rounded-md ${profileErrors.phoneNumber ? 'border-red-500' : 'border-gray-300'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
-            {errors.officeAddress && (
-              <p className="text-red-500 text-xs mt-1">{errors.officeAddress}</p>
+            {profileErrors.phoneNumber && (
+              <p className="text-red-500 text-xs mt-1">{profileErrors.phoneNumber}</p>
             )}
           </div>
+          {currentUser.agentProfile && (
+            <div className="mt-6 border-t pt-4">
+              <h3 className="text-lg font-semibold mb-2">{t('agentProfile.title')}</h3>
+
+              <div className="mb-2">
+                <span className="font-medium">{t('agentProfile.verificationStatus')}:</span>{' '}
+                <span
+                  className={`px-2 py-1 text-xs rounded-full ${currentUser.agentProfile.verification_status === 'verified'
+                    ? 'bg-green-100 text-green-800'
+                    : currentUser.agentProfile.verification_status === 'rejected'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                >
+                  {t(`agentProfile.verificationStatuses.${currentUser.agentProfile.verification_status}`)}
+                </span>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('agentProfile.companyName')}
+                </label>
+                <input
+                  type="text"
+                  id="companyName"
+                  name="companyName"
+                  value={profileValues.companyName}
+                  onChange={handleProfileChange}
+                  onBlur={handleProfileBlur}
+                  className={`w-full p-3 border rounded-md ${profileErrors.companyName ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {profileErrors.companyName && (
+                  <p className="text-red-500 text-xs mt-1">{profileErrors.companyName}</p>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="officeAddress" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('agentProfile.officeAddress')}
+                </label>
+                <input
+                  id="officeAddress"
+                  name="officeAddress"
+                  rows="3"
+                  value={profileValues.officeAddress}
+                  onChange={handleProfileChange}
+                  onBlur={handleProfileBlur}
+                  className={`w-full p-3 border rounded-md ${profileErrors.officeAddress ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {profileErrors.officeAddress && (
+                  <p className="text-red-500 text-xs mt-1">{profileErrors.officeAddress}</p>
+                )}
+              </div>
+
+            </div>
+          )}
 
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            {t('agent.updateInfo')}
+            {t('profile.updateInfo')}
           </button>
         </form>
       </div>
 
-      {/* ----- MY PROPERTIES ----- */}
-      <div className="mb-8">
+      <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">{t('agent.myProperties')}</h2>
-          <Link
-            to="/properties/upload"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          <h2 className="text-xl font-semibold">{t('profile.password')}</h2>
+          <button
+            type="button"
+            onClick={() => setShowPasswordForm(!showPasswordForm)}
+            className="text-blue-600 hover:text-blue-800 focus:outline-none"
           >
-            {t('agent.addProperty')}
-          </Link>
+            {showPasswordForm ? t('common.cancel') : t('profile.updatePassword')}
+          </button>
         </div>
 
-        {loadingData ? (
-          <p className="text-center py-8">Loading…</p>
-        ) : properties.length === 0 ? (
-          <div className="bg-gray-100 p-8 text-center rounded">
-            {t('agent.noProperties')}
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {properties.map((p) => (
-              <PropertyCard key={p.property_id} property={p} isAgent />
-            ))}
-          </div>
+        {showPasswordForm && (
+          <>
+            {passwordSuccess && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {t('profile.passwordUpdateSuccess')}
+              </div>
+            )}
+
+            {passwordError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {passwordError}
+              </div>
+            )}
+
+            <form onSubmit={submitPasswordForm}>
+              <div className="mb-4">
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('profile.currentPassword')}
+                </label>
+                <input
+                  type="password"
+                  id="currentPassword"
+                  name="currentPassword"
+                  value={passwordValues.currentPassword}
+                  onChange={handlePasswordChange}
+                  onBlur={handlePasswordBlur}
+                  className={`w-full p-3 border rounded-md ${passwordErrors.currentPassword ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {passwordErrors.currentPassword && (
+                  <p className="text-red-500 text-xs mt-1">{passwordErrors.currentPassword}</p>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('profile.newPassword')}
+                </label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  name="newPassword"
+                  value={passwordValues.newPassword}
+                  onChange={handlePasswordChange}
+                  onBlur={handlePasswordBlur}
+                  className={`w-full p-3 border rounded-md ${passwordErrors.newPassword ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {passwordErrors.newPassword && (
+                  <p className="text-red-500 text-xs mt-1">{passwordErrors.newPassword}</p>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('profile.confirmPassword')}
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={passwordValues.confirmPassword}
+                  onChange={handlePasswordChange}
+                  onBlur={handlePasswordBlur}
+                  className={`w-full p-3 border rounded-md ${passwordErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {passwordErrors.confirmPassword && (
+                  <p className="text-red-500 text-xs mt-1">{passwordErrors.confirmPassword}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                {t('profile.updatePassword')}
+              </button>
+            </form>
+          </>
         )}
       </div>
     </div>
   );
 };
 
-export default AgentProfile;
+export default UserProfile;

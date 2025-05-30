@@ -31,7 +31,11 @@
     "passwordTooShort": "Password must be at least 8 characters long",
     "passwordsMustMatch": "Passwords must match",
     "currentPasswordRequired": "Current password is required",
-    "invalidCurrentPassword": "Current password is incorrect"
+    "invalidCurrentPassword": "Current password is incorrect",
+    "info": "Information",
+    "updateInfo": "Update",
+    "password": "Password",
+    "updatePassword": "Update Password"
   },
   "agentProfile": {
     "title": "Agent Profile",
@@ -103,5 +107,8 @@
     "savePreferences": "Save Preferences",
     "saveSuccess": "Preferences saved successfully",
     "saveFailed": "Failed to save preferences"
+  },
+  "common":{
+    "cancel": "Cancel"
   }
 }

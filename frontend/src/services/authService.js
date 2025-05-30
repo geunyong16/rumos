@@ -68,8 +68,8 @@ export const logout = async () => {
 // Get current user profile
 export const getCurrentUser = async () => {
   try {
-    const response = await api.get('/auth/profile');
-    return response.data;
+    const response = await api.get('/users/profile');
+    return response.data.user;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to get user profile');
   }
@@ -78,8 +78,8 @@ export const getCurrentUser = async () => {
 // Update user profile
 export const updateUserProfile = async (userData) => {
   try {
-    const response = await api.put('/auth/profile', userData);
-    return response.data;
+    const response = await api.put('/users/profile', userData);
+    return response.data.user;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Failed to update profile');
   }

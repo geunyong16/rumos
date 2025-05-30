@@ -28,7 +28,7 @@ const UserProfile = () => {
     try {
       const updatedUser = await updateUserProfile({
         email: values.email,
-        phoneNumber: values.phoneNumber,
+        phone_number: values.phoneNumber
       });
       
       // Update the user context

@@ -142,6 +142,7 @@ const agentController = {
                 message: 'Agent profile updated successfully',
                 agent: updatedAgent
             });
+
         } catch (error) {
             console.error('Error updating agent profile:', error);
             // If error occurs, delete uploaded file if it exists
