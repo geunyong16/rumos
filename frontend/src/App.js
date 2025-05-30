@@ -54,7 +54,16 @@ function App() {
             <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
             <Route path="/profile/agent" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
             <Route path="/agent/properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
+
+            {/* ★★★ 여기 추가 ★★★ */}
+            {/* 매물 수정 페이지 (연필 버튼) */}
+            <Route path="/agent/properties/edit/:id"
+                   element={
+                     /* 필요하다면 requireAgent 같은 prop을 추가하세요 */
+                     <ProtectedRoute><PropertyUpload /></ProtectedRoute>
+                   } />
             {/* Admin */}
+            
             <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
 
             {/* 404 */}

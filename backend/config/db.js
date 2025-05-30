@@ -6,7 +6,7 @@ const pool = new Pool({
     port: 5432,
     database: "postgres", // Changed from "lumos" to "rumos" as mentioned in SQL
     user: "postgres",
-    password: "1111"
+    password: "0408"
 });
 
 // Test database connection
