@@ -216,22 +216,44 @@ const updateUser = (updater) => {
   };
 
   const login = async (username, password) => {
-    try {
-      setError(null);
-      setLoading(true);
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, { username, password });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setCurrentUser(user);
-      return user;
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed');
-      throw err;
-    } finally {
-      setLoading(false);
+  try {
+    setError(null);
+    setLoading(true);
+
+    /* 1️⃣ 로그인 */
+    const { data } = await axios.post(
+      `${process.env.REACT_APP_API_URL}/users/login`,
+      { username, password }
+    );
+
+    const { token, user } = data;
+    localStorage.setItem('token', token);
+
+    /* 2️⃣ agent 인데 응답에 agentProfile 이 없으면 추가 조회 */
+    let finalUser = user;
+    if (user.role === 'agent' && !user.agentProfile) {
+      try {
+        // api 인스턴스에 토큰 인터셉터가 있다면 헤더는 자동
+        const agentProfile = await getAgentProfile();
+        finalUser = { ...user, agentProfile };
+      } catch (e) {
+        console.warn('⚠️  agentProfile fetch failed → 계속 진행', e);
+      }
     }
-  };
+
+    /* 3️⃣ 컨텍스트·로컬스토리지 동기화 */
+    setCurrentUser(finalUser);
+    localStorage.setItem('user', JSON.stringify(finalUser));
+
+    return finalUser;
+  } catch (err) {
+    console.error('Login error:', err);
+    setError(err.response?.data?.message || 'Login failed');
+    throw err;
+  } finally {
+    setLoading(false);
+  }
+};
 
   const register = async (userData) => {
     try {

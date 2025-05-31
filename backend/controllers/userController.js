@@ -96,6 +96,11 @@ const userController = {
                 role: user.role
             });
 
+            let agentProfile = null;
+            if(user.role == 'agent'){
+                agentProfile = await agentModel.getAgentByUserId(user.user_id);
+            }
+
             res.status(200).json({
                 message: 'Login successful',
                 user: {
@@ -103,7 +108,8 @@ const userController = {
                     username: user.username,
                     email: user.email,
                     phone_number: user.phone_number,
-                    role: user.role
+                    role: user.role,
+                    agentProfile
                 },
                 token
             });
